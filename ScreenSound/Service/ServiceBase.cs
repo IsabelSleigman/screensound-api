@@ -5,13 +5,17 @@ namespace ScreenSound.Service
     internal class ServiceBase<T> where T : class
     {
         protected readonly ScreenSoundContext _context;
-        protected ServiceBase(ScreenSoundContext context)
+        public ServiceBase(ScreenSoundContext context)
         {
             _context = context;
         }
         public List<T> Listar()
         {
             return _context.Set<T>().ToList();
+        }
+        public List<T> ListarPor(Func<T, bool> condicao)
+        {
+            return _context.Set<T>().Where(condicao).ToList();
         }
         public void Adicionar(T entidade)
         {
