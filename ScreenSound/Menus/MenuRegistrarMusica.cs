@@ -1,21 +1,22 @@
 ﻿using ScreenSound.Modelos;
+using ScreenSound.Service;
 
 namespace ScreenSound.Menus;
 
 internal class MenuRegistrarMusica : Menu
 {
-    public override void Executar(Dictionary<string, Artista> artistasRegistrados)
+    public override void Executar(ArtistaService artistaService)
     {
-        base.Executar(artistasRegistrados);
+        base.Executar(artistaService);
         ExibirTituloDaOpcao("Registro de músicas");
         Console.Write("Digite o artista cuja música deseja registrar: ");
         string nomeDoArtista = Console.ReadLine()!;
-        if (artistasRegistrados.ContainsKey(nomeDoArtista))
+        var artistaPesquisado = artistaService.BuscarArtista(nomeDoArtista);
+        if (artistaPesquisado is not null)
         {
             Console.Write("Agora digite o título da música: ");
             string tituloDaMusica = Console.ReadLine()!;
-            Artista artista = artistasRegistrados[nomeDoArtista];
-            artista.AdicionarMusica(new Musica(tituloDaMusica));
+            artistaPesquisado.AdicionarMusica(new Musica(tituloDaMusica));
             Console.WriteLine($"A música {tituloDaMusica} de {nomeDoArtista} foi registrada com sucesso!");
             Thread.Sleep(4000);
             Console.Clear();
