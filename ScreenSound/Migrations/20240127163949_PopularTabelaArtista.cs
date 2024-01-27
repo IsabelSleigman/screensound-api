@@ -5,7 +5,7 @@
 namespace ScreenSound.Migrations
 {
     /// <inheritdoc />
-    public partial class PopularTabela : Migration
+    public partial class PopularTabelaArtista : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

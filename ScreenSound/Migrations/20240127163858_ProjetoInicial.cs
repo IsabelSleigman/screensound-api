@@ -5,7 +5,7 @@
 namespace ScreenSound.Migrations
 {
     /// <inheritdoc />
-    public partial class projetoInicial : Migration
+    public partial class ProjetoInicial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -31,22 +31,34 @@ namespace ScreenSound.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AnoLancamento = table.Column<int>(type: "int", nullable: true),
+                    ArtistaId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Musicas", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Musicas_Artistas_ArtistaId",
+                        column: x => x.ArtistaId,
+                        principalTable: "Artistas",
+                        principalColumn: "Id");
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Musicas_ArtistaId",
+                table: "Musicas",
+                column: "ArtistaId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Artistas");
+                name: "Musicas");
 
             migrationBuilder.DropTable(
-                name: "Musicas");
+                name: "Artistas");
         }
     }
 }
