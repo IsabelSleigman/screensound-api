@@ -5,7 +5,7 @@ namespace ScreenSound.Menus;
 
 internal class MenuSair : Menu
 {
-    public override void Executar(ArtistaService artistaService)
+    public override void Executar(ServiceBase<Artista> artista)
     {
         Console.WriteLine("Tchau tchau :)");
     }

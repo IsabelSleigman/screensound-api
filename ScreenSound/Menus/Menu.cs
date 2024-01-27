@@ -13,7 +13,7 @@ internal class Menu
         Console.WriteLine(titulo);
         Console.WriteLine(asteriscos + "\n");
     }
-    public virtual void Executar(ArtistaService artistaService)
+    public virtual void Executar(ServiceBase<Artista> artista)
     {
         Console.Clear();
     }
