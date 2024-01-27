@@ -1,9 +1,11 @@
 ﻿using ScreenSound.Banco;
 using ScreenSound.Menus;
+using ScreenSound.Modelos;
 using ScreenSound.Service;
 
 var context = new ScreenSoundContext();
-var artistaService = new ArtistaService(context);
+
+//var artistaService = ServiceBase<Artista>();
 
 Dictionary<int, Menu> opcoes = new();
 opcoes.Add(1, new MenuRegistrarArtista());
@@ -42,7 +44,7 @@ void ExibirOpcoesDoMenu()
     if (opcoes.ContainsKey(opcaoEscolhidaNumerica))
     {
         Menu menuASerExibido = opcoes[opcaoEscolhidaNumerica];
-        menuASerExibido.Executar(artista);
+        menuASerExibido.Executar(null);
         if (opcaoEscolhidaNumerica > 0) ExibirOpcoesDoMenu();
     } 
     else
