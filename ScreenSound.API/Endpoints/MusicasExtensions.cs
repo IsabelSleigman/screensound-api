@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ScreenSound.API.Requests;
 using ScreenSound.Modelos;
 using ScreenSound.Service;
 
@@ -25,8 +26,9 @@ namespace ScreenSound.API.Endpoints
 
             });
 
-            app.MapPost("/Musicas", ([FromServices] ServiceBase<Musica> service, [FromBody] Musica musica) =>
+            app.MapPost("/Musicas", ([FromServices] ServiceBase<Musica> service, [FromBody] MusicaRequest musicaRequest) =>
             {
+                var musica = new Musica(musicaRequest.nome);
                 service.Adicionar(musica);
                 return Results.Ok();
             });
