@@ -2,9 +2,9 @@
 
 namespace ScreenSound.Service
 {
-    internal class ServiceBase<T> where T : class
+    public class ServiceBase<T> where T : class
     {
-        protected readonly ScreenSoundContext _context;
+        private readonly ScreenSoundContext _context;
         public ServiceBase(ScreenSoundContext context)
         {
             _context = context;
