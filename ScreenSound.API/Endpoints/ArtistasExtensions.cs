@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ScreenSound.API.Requests;
+using ScreenSound.API.Response;
 using ScreenSound.Modelos;
 using ScreenSound.Service;
 
@@ -12,18 +13,24 @@ namespace ScreenSound.API.Endpoints
             #region Endpoint Artistas
             app.MapGet("/Artistas", ([FromServices] ServiceBase<Artista> service) =>
             {
-                return Results.Ok(service.Listar());
+                var listaDeArtistas = service.Listar();
+                if (listaDeArtistas is null)
+                {
+                    return Results.NotFound();
+                }
+                var listaDeArtistaResponse = EntityListToResponseList(listaDeArtistas);
+                return Results.Ok(listaDeArtistaResponse);
             });
 
             app.MapGet("/Artistas/{nome}", ([FromServices] ServiceBase<Artista> service, string nome) =>
             {
-                var artista = service.ListarPor(a => a.Nome.ToUpper().Equals(nome.ToUpper()));
+                var artista = service.BuscarPor(a => a.Nome.ToUpper().Equals(nome.ToUpper()));
 
                 if (artista is null)
                 {
                     return Results.NotFound();
                 }
-                return Results.Ok(artista);
+                return Results.Ok(EntityToResponse(artista));
             });
 
             app.MapPost("/Artistas", ([FromServices] ServiceBase<Artista> service, [FromBody] ArtistaRequest artistaRequest) =>
@@ -45,22 +52,31 @@ namespace ScreenSound.API.Endpoints
                 return Results.NoContent();
             });
 
-            app.MapPut("/Artistas", ([FromServices] ServiceBase<Artista> service, [FromBody] Artista artista) =>
+            app.MapPut("/Artistas", ([FromServices] ServiceBase<Artista> service, [FromBody] ArtistaRequestEdit artistaRequestEdit) =>
             {
-                var artistaParaAtualizar = service.BuscarPor(a => a.Id == artista.Id);
+                var artistaParaAtualizar = service.BuscarPor(a => a.Id == artistaRequestEdit.Id);
 
                 if (artistaParaAtualizar is null)
                 {
                     return Results.NotFound();
                 }
-                artistaParaAtualizar.Nome = artista.Nome is null ? artistaParaAtualizar.Nome : artista.Nome;
-                artistaParaAtualizar.Bio = artista.Bio is null ? artistaParaAtualizar.Bio : artista.Bio;
-                artistaParaAtualizar.FotoPerfil = artista.FotoPerfil is null ? artistaParaAtualizar.FotoPerfil : artista.FotoPerfil;
+                artistaParaAtualizar.Nome = artistaRequestEdit.nome;
+                artistaParaAtualizar.Bio = artistaRequestEdit.bio;
 
                 service.Editar(artistaParaAtualizar);
                 return Results.Ok();
             });
             #endregion
+
+            static ICollection<ArtistaResponse> EntityListToResponseList(IEnumerable<Artista> listaDeArtistas)
+            {
+                return listaDeArtistas.Select(a => EntityToResponse(a)).ToList();
+            }
+
+            static ArtistaResponse EntityToResponse(Artista artista)
+            {
+                return new ArtistaResponse(artista.Id, artista.Nome, artista.Bio, artista.FotoPerfil);
+            }
         }
     }
 }

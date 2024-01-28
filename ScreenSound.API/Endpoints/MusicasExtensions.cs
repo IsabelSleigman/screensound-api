@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ScreenSound.API.Requests;
+using ScreenSound.API.Response;
 using ScreenSound.Modelos;
 using ScreenSound.Service;
+using ScreenSound.Shared.Modelos.Entities;
 
 namespace ScreenSound.API.Endpoints
 {
@@ -12,7 +14,13 @@ namespace ScreenSound.API.Endpoints
             #region Endpoint Músicas
             app.MapGet("/Musicas", ([FromServices] ServiceBase<Musica> service) =>
             {
-                return Results.Ok(service.Listar());
+                var musicaList = service.Listar();
+                if (musicaList is null)
+                {
+                    return Results.NotFound();
+                }
+                var musicaListResponse = EntityListToResponseList(musicaList);
+                return Results.Ok(musicaListResponse);
             });
 
             app.MapGet("/Musicas/{nome}", ([FromServices] ServiceBase<Musica> service, string nome) =>
@@ -22,13 +30,18 @@ namespace ScreenSound.API.Endpoints
                 {
                     return Results.NotFound();
                 }
-                return Results.Ok(musica);
+                return Results.Ok(EntityToResponse(musica));
 
             });
 
-            app.MapPost("/Musicas", ([FromServices] ServiceBase<Musica> service, [FromBody] MusicaRequest musicaRequest) =>
+            app.MapPost("/Musicas", ([FromServices] ServiceBase<Musica> service, ServiceBase <Genero> serviceGenero,[FromBody] MusicaRequest musicaRequest) =>
             {
-                var musica = new Musica(musicaRequest.nome);
+                var musica = new Musica(musicaRequest.nome)
+                {
+                    ArtistaId = musicaRequest.artistaId,
+                    AnoLancamento = musicaRequest.anoLancamento,
+                    Generos = musicaRequest.generos is not null ? GeneroRequestConverter(musicaRequest.generos, serviceGenero) : new List<Genero>()
+                };
                 service.Adicionar(musica);
                 return Results.Ok();
             });
@@ -44,19 +57,54 @@ namespace ScreenSound.API.Endpoints
 
             });
 
-            app.MapPut("/Musicas", ([FromServices] ServiceBase<Musica> service, [FromBody] Musica musica) => {
-                var musicaParaAtualizar = service.BuscarPor(a => a.Id == musica.Id);
+            app.MapPut("/Musicas", ([FromServices] ServiceBase<Musica> service, [FromBody] MusicaRequestEdit musicaRequestEdit) => {
+                var musicaParaAtualizar = service.BuscarPor(a => a.Id == musicaRequestEdit.Id);
                 if (musicaParaAtualizar is null)
                 {
                     return Results.NotFound();
                 }
-                musicaParaAtualizar.Nome = musica.Nome is null ? musicaParaAtualizar.Nome : musica.Nome;
-                musicaParaAtualizar.AnoLancamento = musica.AnoLancamento is null ? musicaParaAtualizar.AnoLancamento : musica.AnoLancamento;
+                musicaParaAtualizar.Nome = musicaRequestEdit.nome;
+                musicaParaAtualizar.AnoLancamento = musicaRequestEdit.anoLancamento;
 
                 service.Editar(musicaParaAtualizar);
                 return Results.Ok();
             });
             #endregion
+        }
+
+        private static ICollection<Genero> GeneroRequestConverter(ICollection<GeneroRequest> generos, ServiceBase<Genero> serviceGenero)
+        {
+            var listaDeGeneros = new List<Genero>();
+            foreach (var item in generos)
+            {
+                var entity = RequestToEntity(item);
+                var genero = serviceGenero.BuscarPor(g => g.Nome.ToUpper().Equals(item.nome.ToUpper()));
+                if (genero is not null)
+                {
+                    listaDeGeneros.Add(genero);
+                }
+                else
+                {
+                    listaDeGeneros.Add(entity);
+                }
+            }
+
+            return listaDeGeneros;
+        }
+
+        private static Genero RequestToEntity(GeneroRequest genero)
+        {
+            return new Genero() { Nome = genero.nome, Descricao = genero.descricao };
+        }
+
+        private static ICollection<MusicaResponse> EntityListToResponseList(IEnumerable<Musica> musicaList)
+        {
+            return musicaList.Select(a => EntityToResponse(a)).ToList();
+        }
+
+        private static MusicaResponse EntityToResponse(Musica musica)
+        {
+            return new MusicaResponse(musica.Id, musica.Nome!, musica.Artista!.Id, musica.Artista.Nome);
         }
     }
 }
