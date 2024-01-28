@@ -26,7 +26,7 @@ public class Artista
         Console.WriteLine($"Discografia do artista {Nome}");
         foreach (var musica in Musicas)
         {
-            Console.WriteLine($"Música: {musica.Nome} - ANo de lançamento {musica.AnoLancamento}");
+            Console.WriteLine($"Música: {musica.Nome} - Ano de lançamento {musica.AnoLancamento}");
         }
     }
 
